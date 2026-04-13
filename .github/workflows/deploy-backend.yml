@@ -1,0 +1,58 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        env:
+          STRAVA_CLIENT_ID: test
+          STRAVA_CLIENT_SECRET: test
+          STRAVA_REDIRECT_URI: http://localhost:8000/auth/strava/callback
+          STRAVA_VERIFY_TOKEN: test
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_SERVICE_KEY: test
+          ANTHROPIC_API_KEY: test
+          REDIS_URL: redis://localhost:6379
+          CELERY_BROKER_URL: redis://localhost:6379
+          SENTRY_DSN: ""
+          SECRET_KEY: test-secret-key-32-characters-ok
+          FRONTEND_URL: http://localhost:3000
+        run: pytest tests/ -v
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          cd backend
+          railway up --service athlete-intelligence-backend
