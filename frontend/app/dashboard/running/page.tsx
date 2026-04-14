@@ -48,10 +48,11 @@ export default function RunningPage() {
   const [weeks, setWeeks] = useState(8);
 
   useEffect(() => {
-    setLoading(true);
+    let active = true;
     api.getRunning(weeks)
-      .then(setData)
-      .finally(() => setLoading(false));
+      .then((d) => { if (active) { setData(d); setLoading(false); } })
+      .catch(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [weeks]);
 
   const summary = data?.summary;

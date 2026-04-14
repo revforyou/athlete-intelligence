@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, type OverviewData, type DailyFeature } from "@/lib/api";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

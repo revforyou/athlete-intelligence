@@ -53,7 +53,7 @@ export default function RecoveryPage() {
     <div className="p-6 space-y-5 w-full">
       <div>
         <h1 className="text-xl font-bold text-gray-900">Recovery & Risk</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Injury risk score explained — what's driving it and how to act</p>
+        <p className="text-sm text-gray-400 mt-0.5">Injury risk score explained — what&apos;s driving it and how to act</p>
       </div>
 
       {loading ? (

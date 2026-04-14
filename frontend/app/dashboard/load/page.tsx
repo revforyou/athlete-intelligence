@@ -132,10 +132,11 @@ export default function LoadPage() {
   const [days, setDays] = useState(42);
 
   useEffect(() => {
-    setLoading(true);
+    let active = true;
     api.getTrainingLoad(days)
-      .then(setData)
-      .finally(() => setLoading(false));
+      .then((d) => { if (active) { setData(d); setLoading(false); } })
+      .catch(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [days]);
 
   const history = data?.history ?? [];

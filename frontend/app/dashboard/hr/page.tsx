@@ -16,10 +16,11 @@ export default function HRPage() {
   const [weeks, setWeeks] = useState(8);
 
   useEffect(() => {
-    setLoading(true);
+    let active = true;
     api.getHeartRate(weeks)
-      .then(setData)
-      .finally(() => setLoading(false));
+      .then((d) => { if (active) { setData(d); setLoading(false); } })
+      .catch(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [weeks]);
 
   const zoneWeeks = data?.zone_weeks ?? [];
