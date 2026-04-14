@@ -98,8 +98,8 @@ async def strava_callback(
         key="ai_token",
         value=jwt_token,
         httponly=True,
-        secure=settings.environment == "production",
-        samesite="lax",
+        secure=True,
+        samesite="none",
         max_age=60 * 60 * 24 * 7,
         path="/",
     )
