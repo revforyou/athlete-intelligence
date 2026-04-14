@@ -2,12 +2,7 @@
 
 > *Strava tells you what you did. This tells you if you should do it again.*
 
-![Status](https://img.shields.io/badge/status-active-brightgreen)
-![Python](https://img.shields.io/badge/python-3.11-blue)
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
-![License](https://img.shields.io/badge/license-MIT-green)
-
-**Live Demo:** [athlete-intel.vercel.app](#) · **API:** [api.athlete-intel.railway.app](#) · **Built by:** [Venkata Revanth Jyothula](#)
+**Live Demo:** [athlete-intel.vercel.app](https://athlete-intelligence-liard.vercel.app/) · **API:** [api.athlete-intel.railway.app](https://athlete-intelligence-production.up.railway.app) · **Built by:** [Venkata Revanth Jyothula](https://www.linkedin.com/in/revanth-jyothula-3822601b5/)
 
 ---
 
@@ -36,9 +31,9 @@ Connect your Strava account. Every day you get:
 ## Demo Flow
 
 1. User connects Strava via OAuth2
-2. Pipeline ingests last 90 days of activities + HR time-series streams
+2. Pipeline ingests the last 90 days of activities + HR time-series streams
 3. Feature engineering computes load metrics and zone distributions in real time
-4. Risk scorer returns a score (0–100) with top contributing factors
+4. Risk scorer returns a score (0–100) with the top contributing factors
 5. Bayesian calibration adjusts thresholds to this specific athlete's history
 6. LLM generates a plain-English recommendation explaining the *why*
 7. Dashboard shows score, zone chart, load history, and drift alerts
@@ -80,7 +75,7 @@ Features computed per athlete per day. This is what makes the project technicall
 
 **TSS is computed from raw HR streams** (second-by-second data from Strava's Streams API), not estimated from summary stats. This gives accurate, sport-specific training stress rather than a rough approximation.
 
-### Training Zone Breakdown *(SWE feature)*
+### Training Zone Breakdown
 
 Pulls the full HR time-series stream per activity (up to 10,000 data points). Computes minutes in each of 5 HR zones per session, then aggregates weekly. Surfaces a polarization score — elite training science recommends ~80% easy (Z1–Z2), ~20% hard (Z4–Z5). Most recreational athletes invert this.
 
@@ -187,7 +182,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ## Project Phases
 
-### Phase 0 — Foundation (Day 1, ~3 hours)
+### Phase 0 — Foundation
 - [ ] Init monorepo: `/frontend` (Next.js) + `/backend` (FastAPI)
 - [ ] Set up Supabase project, run schema migrations
 - [ ] Configure `.env` files — **`.gitignore` committed first, before any other file**
@@ -198,7 +193,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 1 — Strava OAuth + Data Ingestion (Day 1–2, ~4 hours)
+### Phase 1 — Strava OAuth + Data Ingestion
 - [ ] Strava OAuth2 flow (authorize → callback → encrypt tokens → store)
 - [ ] Token refresh logic (tokens expire every 6 hours)
 - [ ] Ingest last 90 days of activities via Strava API
@@ -210,7 +205,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 2 — Feature Engineering Pipeline (Day 2, ~3 hours)
+### Phase 2 — Feature Engineering Pipeline
 - [ ] Compute TSS per activity (sport-specific: run/ride/swim)
 - [ ] Rolling ATL/CTL/TSB with exponential weighting (7-day and 42-day spans)
 - [ ] ACWR, monotony, strain scores
@@ -221,7 +216,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 3 — HR Streams Ingestion + Zone Breakdown (Day 2–3, ~4 hours)
+### Phase 3 — HR Streams Ingestion + Zone Breakdown
 - [ ] Strava Streams API integration (`/activities/{id}/streams?keys=heartrate,watts,cadence`)
 - [ ] Rate-limit-aware batch ingestion queue (100 req/15 min hard limit)
 - [ ] Store compressed streams in `hr_streams` table (int arrays, not JSON)
@@ -234,7 +229,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 4 — Risk Scorer + Drift Detection (Day 3, ~3 hours)
+### Phase 4 — Risk Scorer + Drift Detection
 - [ ] Train logistic regression on synthetic overreaching dataset
 - [ ] Serialize with joblib, version as `model_v1.joblib`
 - [ ] Add SHAP values to explain each score (top 3 contributing factors)
@@ -247,7 +242,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 5 — Bayesian Per-Athlete Calibration (Day 3–4, ~3 hours)
+### Phase 5 — Bayesian Per-Athlete Calibration
 - [ ] Population prior: Beta(α, β) initialized from logistic regression output distribution
 - [ ] Feedback endpoint: `POST /feedback` accepts block rating + stores in `feedback_events`
 - [ ] Beta-Binomial conjugate update: α += hard_count, β += easy_count
@@ -260,7 +255,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 6 — LLM Recommendation Layer (Day 4, ~2 hours)
+### Phase 6 — LLM Recommendation Layer
 - [ ] Claude Haiku integration via Anthropic SDK (async)
 - [ ] System prompt: sports coach persona with athlete's metrics, zone breakdown, calibration state
 - [ ] Recommendation: train / easy / rest + 2-sentence reason
@@ -271,7 +266,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 7 — Frontend Dashboard (Day 4–5, ~4 hours)
+### Phase 7 — Frontend Dashboard
 - [ ] Landing page with Strava connect button
 - [ ] Auth flow (Supabase session management)
 - [ ] Dashboard: risk dial (big number, color-coded), recommendation, calibration confidence
@@ -292,7 +287,7 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 
 ---
 
-### Phase 8 — Observability + Polish (Day 5, ~2 hours)
+### Phase 8 — Observability + Polish
 - [ ] Sentry on frontend and backend
 - [ ] `/health` endpoint for Railway uptime monitoring
 - [ ] Request latency logging middleware
@@ -314,37 +309,6 @@ drift_events      (id, athlete_id, detected_at, psi_score, kl_divergence,
 - Strava webhooks verified via HMAC-SHA256 signature
 - Rate limiting on all endpoints (10 req/min on LLM endpoint for cost control)
 - `.gitignore` committed before any other file — secrets never touch git history
-
----
-
-## Environment Variables
-
-```bash
-# Backend (.env)
-STRAVA_CLIENT_ID=
-STRAVA_CLIENT_SECRET=
-STRAVA_REDIRECT_URI=
-STRAVA_VERIFY_TOKEN=        # For webhook subscription verification
-
-SUPABASE_URL=
-SUPABASE_SERVICE_KEY=
-
-ANTHROPIC_API_KEY=
-
-REDIS_URL=
-CELERY_BROKER_URL=
-
-SECRET_KEY=                 # For AES token encryption + JWT signing
-FRONTEND_URL=               # For CORS allow-list
-
-SENTRY_DSN=
-ENVIRONMENT=development
-
-# Frontend (.env.local)
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-NEXT_PUBLIC_API_URL=
-```
 
 ---
 
@@ -406,7 +370,6 @@ athlete-intelligence/
 ├── CLAUDE.md                     # Instructions for Claude Code
 └── README.md
 ```
-
 ---
 
 ## Local Development
@@ -440,51 +403,4 @@ cd backend && pytest tests/ -v
 
 ---
 
-## Resume Bullets
-
-```
-• Designed async HR time-series ingestion pipeline processing Strava activity
-  streams (10K points/activity) with rate-limit-aware batching (100 req/15 min),
-  computing per-athlete weekly training zone distributions and surfacing
-  polarization imbalance as a contributing factor to injury risk scores
-
-• Implemented per-athlete Bayesian risk calibration using Beta-Binomial conjugate
-  updates on athlete-reported training outcomes, personalizing injury probability
-  thresholds that converge from population priors after ~8 feedback events, with
-  model state versioned per athlete in Postgres
-
-• Built end-to-end athlete load monitoring platform ingesting real Strava OAuth
-  data, engineering 6 training load features (ATL/CTL/TSB/ACWR) with SHAP-based
-  explainability, serving ML risk scores via FastAPI with sub-200ms p99 latency
-
-• Integrated Claude Haiku as a personalized coaching layer generating plain-English
-  risk explanations with token usage tracking and Redis response caching to
-  minimize inference cost
-```
-
----
-
-## What This Demonstrates
-
-| What They See | What It Signals |
-|---|---|
-| Rate-limited stream ingestion pipeline | You understand real API constraints, not just happy-path integration |
-| Beta-Binomial online learning | You know production ML patterns: cold start, online updates, uncertainty quantification |
-| SHAP explainability on risk scores | You think about ML interpretability, not just accuracy |
-| AES-encrypted OAuth tokens | You take security seriously at the data layer, not just at the API layer |
-| Celery async task queue | You know how to design systems that don't block under load |
-| Plain-English explanations for every score | You build for users, not just for engineers |
-
----
-
-## Roadmap (Post-Portfolio)
-
-- Power-based TSS using normalized power from cycling power meters
-- Multi-sport CTL normalization for triathletes
-- HRV integration from Garmin/Apple Health
-- Coach dashboard — monitor multiple athletes
-- Connect to HabitOS personal operating system
-
----
-
-*Built by Venkata Revanth Jyothula — [LinkedIn](#) · [GitHub](#)*
+*Built by Venkata Revanth Jyothula — [LinkedIn](https://www.linkedin.com/in/revanth-jyothula-3822601b5/) · [GitHub](https://github.com/revforyou)*
