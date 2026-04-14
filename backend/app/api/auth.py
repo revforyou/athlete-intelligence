@@ -93,9 +93,17 @@ async def strava_callback(
     background_tasks.add_task(ingest_athlete_activities, athlete_id, days_back=90)
 
     jwt_token = create_access_token({"sub": str(athlete_id)})
-    return RedirectResponse(
-        url=f"{settings.frontend_url}/dashboard?token={jwt_token}"
+    response = RedirectResponse(url=f"{settings.frontend_url}/dashboard")
+    response.set_cookie(
+        key="ai_token",
+        value=jwt_token,
+        httponly=True,
+        secure=settings.environment == "production",
+        samesite="lax",
+        max_age=60 * 60 * 24 * 7,
+        path="/",
     )
+    return response
 
 
 @router.get("/webhook")

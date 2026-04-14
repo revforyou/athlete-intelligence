@@ -29,7 +29,7 @@ app.add_middleware(
 )
 
 # Register routers
-from app.api import athletes, auth, activities, feedback, scores, zones
+from app.api import athletes, auth, activities, analytics, feedback, scores, zones
 
 app.include_router(auth.router)
 app.include_router(athletes.router)
@@ -37,6 +37,7 @@ app.include_router(scores.router)
 app.include_router(zones.router)
 app.include_router(activities.router)
 app.include_router(feedback.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health")

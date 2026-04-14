@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Frontend (Next.js)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "cwd": "/Users/revanthjyothula/Desktop/athlete-intelligence/frontend"
+    },
+    {
+      "name": "Backend (FastAPI)",
+      "runtimeExecutable": "/opt/anaconda3/bin/python3",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
+      "port": 8000,
+      "cwd": "/Users/revanthjyothula/Desktop/athlete-intelligence/backend"
+    }
+  ]
+}

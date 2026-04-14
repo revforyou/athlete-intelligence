@@ -12,37 +12,50 @@ celery_app.conf.accept_content = ["json"]
 celery_app.conf.timezone = "UTC"
 
 
+# Async version — used directly by FastAPI BackgroundTasks
+async def ingest_athlete_activities(athlete_id: str, days_back: int = 90):
+    try:
+        await _ingest_async(athlete_id, days_back)
+    except Exception as exc:
+        from app.services.strava import StravaRateLimitError
+        if isinstance(exc, StravaRateLimitError):
+            # Just log and bail — Celery would retry but we're running inline
+            import logging
+            logging.warning(f"Strava rate limit hit for athlete {athlete_id}, skipping ingestion")
+        else:
+            raise
+
+
+# Celery task wrapper — used in production with a worker
 @celery_app.task(
     bind=True,
     max_retries=5,
-    default_retry_delay=15 * 60,  # 15-min retry on rate limit
+    default_retry_delay=15 * 60,
+    name="tasks.ingest_athlete_activities_celery",
 )
-def ingest_athlete_activities(self, athlete_id: str, days_back: int = 90):
+def ingest_athlete_activities_celery(self, athlete_id: str, days_back: int = 90):
     try:
         asyncio.run(_ingest_async(athlete_id, days_back))
     except Exception as exc:
         from app.services.strava import StravaRateLimitError
-
         if isinstance(exc, StravaRateLimitError):
             raise self.retry(exc=exc, countdown=15 * 60)
         raise
 
 
 async def _ingest_async(athlete_id: str, days_back: int):
+    import pandas as pd
+
     from app.core.database import get_db
     from app.ml.drift import detect_drift
     from app.ml.features import compute_features, compute_tss
-    from app.ml.zones import compute_weekly_zones, compute_zone_minutes, detect_zone_drift
+    from app.ml.zones import compute_weekly_zones, compute_zone_minutes
     from app.services.strava import fetch_activities
     from app.services.streams import ingest_activity_streams
-
-    import pandas as pd
-    from datetime import datetime, timezone
 
     activities = await fetch_activities(athlete_id, days_back=days_back)
     db = await get_db()
 
-    # Fetch athlete max_hr
     ath_result = await db.table("athletes").select("max_hr").eq("id", athlete_id).execute()
     max_hr = ath_result.data[0]["max_hr"] if ath_result.data else 190
 
@@ -72,12 +85,10 @@ async def _ingest_async(athlete_id: str, days_back: int):
 
         tss_by_date[act_date] = tss_by_date.get(act_date, 0) + tss
 
-        # Ingest HR streams in the background for recent activities (last 30 days)
         cutoff = date.today() - timedelta(days=30)
         if activity_uuid and act_date >= cutoff and avg_hr > 0:
             await ingest_activity_streams(athlete_id, activity_uuid, act["id"])
 
-    # Compute daily features
     if tss_by_date:
         idx = pd.date_range(
             start=min(tss_by_date.keys()), end=date.today(), freq="D"
@@ -99,7 +110,6 @@ async def _ingest_async(athlete_id: str, days_back: int):
                 }
             ).execute()
 
-    # Compute weekly zone distributions from stored HR streams
     streams_result = await db.table("hr_streams").select("*,activities(date)").eq("athlete_id", athlete_id).execute()
     week_zone_data: dict[date, list] = {}
 
@@ -109,11 +119,9 @@ async def _ingest_async(athlete_id: str, days_back: int):
         act_date_str = (stream.get("activities") or {}).get("date")
         if not hr or not act_date_str:
             continue
-
         act_date = date.fromisoformat(act_date_str)
         week_start = act_date - timedelta(days=act_date.weekday())
         zone_mins = compute_zone_minutes(hr, ts, max_hr)
-
         if week_start not in week_zone_data:
             week_zone_data[week_start] = []
         week_zone_data[week_start].append(zone_mins)
@@ -128,7 +136,6 @@ async def _ingest_async(athlete_id: str, days_back: int):
             }
         ).execute()
 
-    # Drift detection on ACWR
     features_result = await db.table("daily_features").select("acwr,date").eq("athlete_id", athlete_id).order("date", desc=False).execute()
     if features_result.data and len(features_result.data) >= 15:
         acwr_values = [r["acwr"] for r in features_result.data if r["acwr"] is not None]
