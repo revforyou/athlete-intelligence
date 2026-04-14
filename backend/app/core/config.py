@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     groq_api_key: str
     redis_url: str
     celery_broker_url: str
-    sentry_dsn: str
+    sentry_dsn: str = ""
     secret_key: str
     frontend_url: str
     environment: str = "development"
