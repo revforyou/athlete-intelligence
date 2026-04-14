@@ -36,7 +36,18 @@
       "Bash(python3 -m uvicorn --version)",
       "Bash(/opt/anaconda3/bin/pip install:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m ':*)"
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(gh run:*)",
+      "Bash(git commit -m 'fix: make sentry_dsn optional \\(defaults to empty string\\):*)",
+      "Bash(git commit -m 'fix: use SameSite=none;Secure for cross-origin cookie \\(Vercel→Railway\\):*)",
+      "Bash(git commit -m 'chore: disable redundant CI workflows \\(Railway+Vercel deploy directly from GitHub\\):*)",
+      "Bash(rm /Users/revanthjyothula/Desktop/athlete-intelligence/.git/index.lock)",
+      "Bash(find frontend/components -type f -name \"*.tsx\" -exec grep -l \"\" {} \\\\;)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(find /Users/revanthjyothula/Desktop/athlete-intelligence -name \".DS_Store\" -not -path \"*/.git/*\" -delete)",
+      "Bash(git commit -m 'chore: repo cleanup before close:*)"
     ]
   }
 }
