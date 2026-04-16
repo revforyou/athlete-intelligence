@@ -80,7 +80,7 @@ async def _ingest_async(athlete_id: str, days_back: int):
             "raw_data": act,
         }
 
-        result = await db.table("activities").upsert(upsert_data).execute()
+        result = await db.table("activities").upsert(upsert_data, on_conflict="strava_activity_id").execute()
         activity_uuid = result.data[0]["id"] if result.data else None
 
         tss_by_date[act_date] = tss_by_date.get(act_date, 0) + tss

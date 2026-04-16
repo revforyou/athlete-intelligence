@@ -10,7 +10,10 @@ import {
   Flag,
   Heart,
   MessageCircle,
+  LogOut,
 } from "lucide-react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 const NAV = [
   { label: "Overview",   href: "/dashboard",         icon: LayoutDashboard },
@@ -61,7 +64,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-4 border-t" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+        <div className="px-4 py-4 border-t space-y-3" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+          <button
+            onClick={() => { window.location.href = `${API_BASE}/auth/strava/logout`; }}
+            className="flex items-center gap-2 text-xs text-gray-400 hover:text-red-500 transition-colors w-full cursor-pointer"
+          >
+            <LogOut size={13} />
+            Sign out
+          </button>
           <p className="text-[10px] text-gray-400 leading-relaxed">
             Powered by Strava + Groq
           </p>

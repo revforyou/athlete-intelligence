@@ -106,6 +106,13 @@ async def strava_callback(
     return response
 
 
+@router.post("/logout")
+async def logout():
+    response = RedirectResponse(url=f"{settings.frontend_url}/")
+    response.delete_cookie(key="ai_token", path="/", samesite="none", secure=True)
+    return response
+
+
 @router.get("/webhook")
 async def strava_webhook_verify(
     hub_mode: str = Query(None, alias="hub.mode"),
