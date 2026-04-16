@@ -16,13 +16,29 @@ const MOCK_METRICS = [
 ];
 
 function MockRiskDial() {
+  // Score = 11/100. Arc goes from -215deg to 35deg (250deg total sweep).
+  // 11% of 250deg = 27.5deg of fill. We use a circle with circumference = 2πr.
+  const r = 54;
+  const circ = 2 * Math.PI * r; // ~339
+  const pct = 11 / 100;
+  const filled = circ * pct;   // ~37
   return (
     <div className="flex flex-col items-center">
-      <svg viewBox="0 0 200 140" className="w-40 h-28">
-        <path d="M 30.0 121.2 A 70 70 0 1 1 170.0 121.2" fill="none" stroke="#E5E7EB" strokeWidth={14} strokeLinecap="round" />
-        <path d="M 30.0 121.2 A 70 70 0 0 1 99.9 30.0" fill="none" stroke="#1D9E75" strokeWidth={14} strokeLinecap="round" />
-        <text x="100" y="108" textAnchor="middle" fontSize={38} fontWeight="700" fill="#1D9E75" fontFamily="monospace">11</text>
-        <text x="100" y="126" textAnchor="middle" fontSize={11} fill="#6B7280">Low Risk</text>
+      <svg viewBox="0 0 120 80" className="w-40 h-28">
+        {/* Track — 250deg arc, starts at 145deg */}
+        <circle cx="60" cy="62" r={r} fill="none" stroke="#E5E7EB" strokeWidth={10}
+          strokeDasharray={`${circ * 0.694} ${circ}`}
+          strokeDashoffset={0}
+          strokeLinecap="round"
+          transform="rotate(145 60 62)" />
+        {/* Fill — 11% */}
+        <circle cx="60" cy="62" r={r} fill="none" stroke="#1D9E75" strokeWidth={10}
+          strokeDasharray={`${filled} ${circ}`}
+          strokeDashoffset={0}
+          strokeLinecap="round"
+          transform="rotate(145 60 62)" />
+        <text x="60" y="60" textAnchor="middle" fontSize={22} fontWeight="700" fill="#1D9E75" fontFamily="monospace">11</text>
+        <text x="60" y="73" textAnchor="middle" fontSize={7} fill="#6B7280">Low Risk</text>
       </svg>
     </div>
   );
@@ -93,14 +109,8 @@ export default function Home() {
               style={{ border: "0.5px solid rgba(0,0,0,0.08)" }}>
               {/* Mock header */}
               <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-800">Athlete Intelligence</span>
-                <div className="flex gap-2">
-                  {["All", "Run", "Weight"].map(t => (
-                    <span key={t} className={`text-xs px-2.5 py-1 rounded-full font-medium ${t === "All" ? "bg-gray-900 text-white" : "text-gray-400 hover:text-gray-600"}`}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
+                <span className="text-sm font-semibold text-gray-800">AthleteIQ</span>
+                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-900 text-white">Running</span>
               </div>
 
               <div className="p-4 space-y-4">
