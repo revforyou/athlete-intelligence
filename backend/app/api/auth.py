@@ -106,7 +106,7 @@ async def strava_callback(
     return response
 
 
-@router.post("/logout")
+@router.get("/logout")
 async def logout():
     response = RedirectResponse(url=f"{settings.frontend_url}/")
     response.delete_cookie(key="ai_token", path="/", samesite="none", secure=True)
